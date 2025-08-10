@@ -1,7 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from .routers import router
 
-from app.routers import todos
+from . import models
+from .database import engine, SessionLocal
+from sqlalchemy.orm import Session
 
 app = FastAPI()
 
-app.include_router(todos.router)
+models.Base.metadata.create_all(bind=engine)
+
+app.include_router(router)
