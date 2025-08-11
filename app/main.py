@@ -1,10 +1,9 @@
 from fastapi import FastAPI
 from scalar_fastapi import get_scalar_api_reference
-from .routers import router
+from app.todo_app.routers import router
+from app.todo_app.database import engine
 
-from . import models
-from .database import engine, SessionLocal
-from sqlalchemy.orm import Session
+from app.todo_app import models
 
 app = FastAPI(
     title='Todo application',
