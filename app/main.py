@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from scalar_fastapi import get_scalar_api_reference
+
 from app.todo_app.routers import router
-from app.todo_app.database import engine
+from app.todo_app.database import engine, SessionLocal
 
 from app.todo_app import models
 
