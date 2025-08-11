@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from scalar_fastapi import get_scalar_api_reference
 
 from app.todo_app.routers import router
-from app.todo_app.database import engine, SessionLocal
+from app.todo_app.database import engine
 
 from app.todo_app import models
 
@@ -20,4 +20,5 @@ async def scalar_html():
     return get_scalar_api_reference(
         openapi_url=app.openapi_url,
         title=app.title,
+        hide_models=True
     )
