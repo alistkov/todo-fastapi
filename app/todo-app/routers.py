@@ -5,7 +5,7 @@ from .database import db_dependency
 
 router = APIRouter(
   prefix="/todos",
-  tags=["todos"]
+  tags=["Todos"]
 )
 
 @router.get('/')
