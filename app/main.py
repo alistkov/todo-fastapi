@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from scalar_fastapi import get_scalar_api_reference
 
-from app.todo_app.routers import router
-from app.todo_app.database import engine
+from .routers import todos, auth
+from .database import engine
 
-from app.todo_app import models
+from . import models
 
 app = FastAPI(
     title='Todo application',
@@ -13,7 +13,8 @@ app = FastAPI(
 
 models.Base.metadata.create_all(bind=engine)
 
-app.include_router(router)
+app.include_router(todos.router)
+app.include_router(auth.router)
 
 @app.get("/scalar", include_in_schema=False)
 async def scalar_html():
