@@ -3,10 +3,21 @@ from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 from passlib.context import CryptContext
 from typing import Annotated
+from jose import jwt
+import os
+from dotenv import load_dotenv
+from datetime import timedelta, datetime, timezone
+from pydantic import BaseModel
 
 from ..models.user import User
 from ..database import db_dependency
 from ..entities.user import CreateUserRequest, UpdateUserRequest, UserResponse
+
+load_dotenv()
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
 router = APIRouter(
     tags=["User"]
@@ -20,7 +31,16 @@ def authenticate_user(username: str, password: str, db: db_dependency):
         return False
     if not bcrypt_context.verify(password, user.password):
         return False
-    return True
+    return user
+
+def create_access_token(username: str,
+                        user_id: int,
+                        expires_delta: timedelta):
+    encode = { 'sub': username, 'id': user_id }
+    expires = datetime.now(timezone.utc) + expires_delta
+    encode.update({ 'exp': expires })
+    return jwt.encode(encode, os.getenv('SECRET_KEY'), algorithm=os.getenv('ALGORITHM'))
+
 
 @router.post('/register', status_code=status.HTTP_201_CREATED, response_model=UserResponse)
 async def register(db: db_dependency, user: CreateUserRequest):
@@ -36,13 +56,17 @@ async def register(db: db_dependency, user: CreateUserRequest):
     db.commit()
     return user_model
 
-@router.post('/login')
+@router.post('/login', status_code=status.HTTP_200_OK, response_model=Token)
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
                 db: db_dependency):
-    if not authenticate_user(form_data.username, form_data.password, db):
+    user = authenticate_user(form_data.username, form_data.password, db)
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
         )
 
-    return 'Successfull!'
+    return {
+            'access_token': create_access_token(user.username, user.id, timedelta(minutes=20)),
+            'token_type': 'bearer'
+        }
