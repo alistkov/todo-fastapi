@@ -20,3 +20,4 @@ class TodoResponse(BaseModel):
     completed: bool
     created_at: datetime
     updated_at: datetime
+    owner_id: int
