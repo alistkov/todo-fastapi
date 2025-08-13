@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, TIMESTAMP, text
+from sqlalchemy import Boolean, Column, Integer, String, TIMESTAMP, text, func
 from ..database import Base
 
 class User(Base):
@@ -13,4 +13,4 @@ class User(Base):
     password = Column(String)
     role = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"))
-    updated_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"))
+    updated_at = Column(TIMESTAMP(timezone=True), onupdate=func.now())

@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from ..models.user import User
 from ..database import db_dependency
-from ..entities.user import CreateUserRequest, UpdateUserRequest, UserResponse
+from ..entities.user import CreateUserRequest, UserResponse
 
 load_dotenv()
 

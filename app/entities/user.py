@@ -15,7 +15,6 @@ class UpdateUserRequest(BaseModel):
     first_name: str = Field(min_length=3)
     last_name: str = Field(min_length=3)
     is_active: bool
-    password: str = Field(min_length=3)
     role: str = Field(min_length=3)
 
 class UserResponse(BaseModel):
@@ -25,7 +24,10 @@ class UserResponse(BaseModel):
     first_name: str
     last_name: str
     is_active: bool
-    password: str
     role: str
     created_at: datetime
     updated_at: datetime
+
+class UserVerification(BaseModel):
+    password: str
+    new_password: str = Field(min_length=5, max_length=16)
