@@ -6,7 +6,7 @@ from typing import Annotated
 from ..models.todos import Todo
 from ..database import db_dependency
 from ..entities.todos import CreateTodoRequest, TodoResponse, UpdateTodoRequest
-from .user import get_current_user
+from .auth import get_current_user
 
 router = APIRouter(
     prefix="/todos",

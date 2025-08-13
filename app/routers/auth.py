@@ -20,7 +20,7 @@ class Token(BaseModel):
     token_type: str
 
 router = APIRouter(
-    tags=["User"]
+    tags=["Auth"]
 )
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
