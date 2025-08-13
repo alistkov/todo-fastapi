@@ -14,3 +14,6 @@ class User(Base):
     role = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"))
     updated_at = Column(TIMESTAMP(timezone=True), onupdate=func.now())
+
+    class Config:
+        orm_mode = True

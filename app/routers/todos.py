@@ -59,13 +59,9 @@ async def update_todo(user: user_dependency,
     if todo_model is None:
         raise HTTPException(status_code=404, detail=f'Todo with #{id} not found')
 
-    todo_model.title = body.title
-    todo_model.description = body.description
-    todo_model.priority = body.priority
-    todo_model.completed = body.completed
-    todo_model.updated_at = datetime.now()
+    for field, value in body.dict(exclude_unset=True).items():
+        setattr(todo_model, field, value)
 
-    db.add(todo_model)
     db.commit()
     db.refresh(todo_model)
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, TIMESTAMP, text, ForeignKey
+from sqlalchemy import Boolean, Column, Integer, String, TIMESTAMP, text, ForeignKey, func
 from ..database import Base
 
 class Todo(Base):
@@ -10,5 +10,8 @@ class Todo(Base):
     priority = Column(Integer)
     completed = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"))
-    updated_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"))
+    updated_at = Column(TIMESTAMP(timezone=True), onupdate=func.now())
     owner_id = Column(Integer, ForeignKey('users.id'), comment='Owner id')
+
+    class Config:
+        orm_mode = True
