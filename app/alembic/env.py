@@ -5,20 +5,30 @@ from sqlalchemy import pool
 
 from alembic import context
 
+import os
+import sys
+from pathlib import Path
+
+# Add the project root to the Python path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+from app.models.todos import Todo
+from app.models.user import User
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+target_metadata = [Todo.metadata, User.metadata]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -71,6 +81,9 @@ def run_migrations_online() -> None:
         with context.begin_transaction():
             context.run_migrations()
 
+db_url = os.getenv("DATABASE_CONNECTION_STRING")
+if db_url:
+    config.set_main_option("sqlalchemy.url", db_url)
 
 if context.is_offline_mode():
     run_migrations_offline()

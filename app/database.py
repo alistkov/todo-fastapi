@@ -8,9 +8,9 @@ from sqlalchemy.ext.declarative import declarative_base
 
 load_dotenv()
 
-DATABASE_URL = f'postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}:5432/{os.getenv('POSTGRES_DB')}'
+# DATABASE_URL = f'postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}:5432/{os.getenv('POSTGRES_DB')}'
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(os.getenv('DATABASE_CONNECTION_STRING'))
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

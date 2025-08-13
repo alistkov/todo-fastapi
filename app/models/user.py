@@ -12,6 +12,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     password = Column(String)
     role = Column(String)
+    phone_number = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"))
     updated_at = Column(TIMESTAMP(timezone=True), onupdate=func.now())
 

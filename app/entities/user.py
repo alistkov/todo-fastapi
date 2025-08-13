@@ -16,6 +16,7 @@ class UpdateUserRequest(BaseModel):
     last_name: str = Field(min_length=3)
     is_active: bool
     role: str = Field(min_length=3)
+    phone_number: str | None = None
 
 class UserResponse(BaseModel):
     id: int
@@ -27,6 +28,7 @@ class UserResponse(BaseModel):
     role: str
     created_at: datetime
     updated_at: datetime
+    phone_number: str | None = None
 
 class UserVerification(BaseModel):
     password: str
