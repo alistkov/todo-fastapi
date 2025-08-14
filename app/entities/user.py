@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Optional
 
 class CreateUserRequest(BaseModel):
     email: str = Field(min_length=3)
@@ -8,6 +9,7 @@ class CreateUserRequest(BaseModel):
     last_name: str = Field(min_length=3)
     password: str = Field(min_length=5, max_length=16)
     role: str = Field(min_length=3)
+    phone_number: Optional[str] = None
 
 class UpdateUserRequest(BaseModel):
     email: str = Field(min_length=3)
@@ -16,7 +18,7 @@ class UpdateUserRequest(BaseModel):
     last_name: str = Field(min_length=3)
     is_active: bool
     role: str = Field(min_length=3)
-    phone_number: str | None = None
+    phone_number: Optional[str] = None
 
 class UserResponse(BaseModel):
     id: int
@@ -28,7 +30,7 @@ class UserResponse(BaseModel):
     role: str
     created_at: datetime
     updated_at: datetime
-    phone_number: str | None = None
+    phone_number: Optional[str] = None
 
 class UserVerification(BaseModel):
     password: str
