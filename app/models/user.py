@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean, Column, Integer, String, TIMESTAMP, text, func
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..database import Base
 
@@ -20,7 +20,7 @@ class User(Base):
 
     def __init__(self, **data):
             super().__init__(**data)
-            self.updated_at = datetime.utcnow()
+            self.updated_at = datetime.now(timezone.utc)
 
     class Config:
         orm_mode = True
