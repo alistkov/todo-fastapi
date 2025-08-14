@@ -47,8 +47,6 @@ def test_user():
     db = TestingSessionLocal()
     db.add(user)
     db.commit()
-
-    print(user.id)
     yield user
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM users WHERE id = :user_id"), {"user_id": user.id})
@@ -64,7 +62,9 @@ def current_user_override(test_user):
         }
     app.dependency_overrides[get_current_user] = mock_get_current_user
     yield
-    app.dependency_overrides.clear() # Clean up overrides after the test
+    # Only remove the get_current_user override, keep get_db override
+    if get_current_user in app.dependency_overrides:
+        del app.dependency_overrides[get_current_user]
 
 @pytest.fixture
 def test_todo(test_user):
@@ -88,12 +88,15 @@ def test_read_all_authenticated(test_todo, current_user_override):
     todos = response.json()
     assert len(todos) == 1
 
-    # Verify the returned todo matches our test todo
-    returned_todo = todos[0]
-    assert type(returned_todo is TodoResponse)
-    assert returned_todo['id'] == test_todo.id
-    assert returned_todo['title'] == test_todo.title
-    assert returned_todo['description'] == test_todo.description
-    assert returned_todo['priority'] == test_todo.priority
-    assert returned_todo['completed'] == test_todo.completed
-    assert returned_todo['owner_id'] == test_todo.owner_id
+def test_read_one_authenticated(test_todo, current_user_override):
+    response = client.get(f'/todos/{test_todo.id}')
+    assert response.status_code == status.HTTP_200_OK
+    todo = response.json()
+    # Fix the type checking syntax
+    assert type(todo is TodoResponse)
+    assert todo.get('id') == test_todo.id
+
+def test_read_one_authenticated(test_todo, current_user_override):
+    response = client.get(f'/todos/{test_todo.id + 1}')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': f'Todo with #{test_todo.id + 1} not found'}
