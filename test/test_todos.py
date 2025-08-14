@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 from fastapi import status
 from datetime import datetime
+from faker import Faker
 
 from app.main import app
 from app.database import Base, get_db
@@ -30,16 +31,17 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
+fake = Faker()
 
 @pytest.fixture
 def test_user():
     user = User(
-        email='j.doe@example.com',
-        username='j.doe',
-        first_name='John',
-        last_name='Doe',
+        email=fake.email(),
+        username=fake.user_name(),
+        first_name=fake.name(),
+        last_name=fake.last_name(),
         role='admin',
-        password='hashed_password',
+        password=fake.password(),
         created_at=datetime.now(),
         updated_at=datetime.now()
     )
@@ -48,7 +50,9 @@ def test_user():
     db.add(user)
     db.commit()
     yield user
+    # First delete all todos for this user to avoid foreign key constraint
     with engine.connect() as connection:
+        connection.execute(text("DELETE FROM todos WHERE owner_id = :user_id"), {"user_id": user.id})
         connection.execute(text("DELETE FROM users WHERE id = :user_id"), {"user_id": user.id})
         connection.commit()
 
@@ -92,11 +96,19 @@ def test_read_one_authenticated(test_todo, current_user_override):
     response = client.get(f'/todos/{test_todo.id}')
     assert response.status_code == status.HTTP_200_OK
     todo = response.json()
-    # Fix the type checking syntax
-    assert type(todo is TodoResponse)
     assert todo.get('id') == test_todo.id
 
-def test_read_one_authenticated(test_todo, current_user_override):
+def test_read_one_not_found(test_todo, current_user_override):
     response = client.get(f'/todos/{test_todo.id + 1}')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': f'Todo with #{test_todo.id + 1} not found'}
+
+def test_create_todo(test_user, current_user_override):
+    request_data = CreateTodoRequest(title="Todo title for test", description="Todo description for test", priority=2)
+    response = client.post('/todos', json=request_data.model_dump())
+    assert response.status_code == status.HTTP_201_CREATED
+    todo: TodoResponse = TodoResponse(**response.json())
+    assert todo.title == request_data.title
+    assert todo.completed is False
+    assert todo.owner_id == test_user.id
+
