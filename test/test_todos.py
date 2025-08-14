@@ -13,7 +13,7 @@ from app.database import Base, get_db
 from app.routers.auth import get_current_user
 from app.models.todos import Todo
 from app.models.user import User
-from app.entities.todos import CreateTodoRequest, TodoResponse
+from app.entities.todos import CreateTodoRequest, TodoResponse, UpdateTodoRequest
 
 load_dotenv()
 
@@ -88,7 +88,6 @@ def test_todo(test_user):
 def test_read_all_authenticated(test_todo, current_user_override):
     response = client.get('/todos')
     assert response.status_code == status.HTTP_200_OK
-
     todos = response.json()
     assert len(todos) == 1
 
@@ -112,3 +111,31 @@ def test_create_todo(test_user, current_user_override):
     assert todo.completed is False
     assert todo.owner_id == test_user.id
 
+def test_update_todo(test_todo, test_user, current_user_override):
+    request_data = UpdateTodoRequest(title='Updated title', description='Updated description', priority=3, completed=True)
+    response = client.put(f'/todos/{test_todo.id}', json=request_data.model_dump())
+    assert response.status_code == status.HTTP_200_OK
+    todo = TodoResponse(**response.json())
+    assert todo.completed is True
+    assert todo.title == request_data.title
+    assert todo.owner_id == test_user.id
+
+def test_update_todo_not_found(test_todo, test_user, current_user_override):
+    request_data = UpdateTodoRequest(title='Updated title', description='Updated description', priority=3, completed=True)
+    response = client.put(f'/todos/{test_todo.id + 1}', json=request_data.model_dump())
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': f'Todo with #{test_todo.id + 1} not found'}
+
+
+def test_delete_todo(test_todo, current_user_override):
+    response = client.delete(f'/todos/{test_todo.id}')
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    db = TestingSessionLocal()
+    todo = db.query(Todo).filter(Todo.id == test_todo.id).first()
+    assert todo is None
+
+def test_delete_todo_not_found(test_todo, current_user_override):
+    response = client.delete(f'/todos/{test_todo.id + 1}')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': f'Todo with #{test_todo.id + 1} not found'}

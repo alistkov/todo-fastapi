@@ -59,7 +59,7 @@ async def update_todo(user: user_dependency,
     if todo_model is None:
         raise HTTPException(status_code=404, detail=f'Todo with #{id} not found')
 
-    for field, value in body.dict(exclude_unset=True).items():
+    for field, value in body.model_dump(exclude_unset=True).items():
         setattr(todo_model, field, value)
 
     db.commit()
