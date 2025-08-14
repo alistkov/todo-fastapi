@@ -4,19 +4,14 @@ from scalar_fastapi import get_scalar_api_reference
 from .routers import auth, todos, admin, user
 from .database import engine
 
-from . import models
+from .models import Base
 
 app = FastAPI(
     title='Todo application',
     version='1.0.0'
 )
 
-models.Base.metadata.create_all(bind=engine)
-
-app.include_router(todos.router)
-app.include_router(auth.router)
-app.include_router(admin.router)
-app.include_router(user.router)
+Base.metadata.create_all(bind=engine)
 
 @app.get("/scalar", include_in_schema=False)
 async def scalar_html():
@@ -25,3 +20,13 @@ async def scalar_html():
         title=app.title,
         hide_models=True
     )
+
+@app.get('/health')
+def health_check():
+    return { 'status': 'Healthy' }
+
+app.include_router(todos.router)
+app.include_router(auth.router)
+app.include_router(admin.router)
+app.include_router(user.router)
+
